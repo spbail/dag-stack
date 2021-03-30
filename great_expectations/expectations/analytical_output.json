@@ -1,0 +1,110 @@
+{
+  "data_asset_type": "Dataset",
+  "expectation_suite_name": "analytical_output",
+  "expectations": [
+    {
+      "expectation_type": "expect_table_columns_to_match_ordered_list",
+      "kwargs": {
+        "column_list": [
+          "pickup_borough",
+          "dropoff_borough",
+          "trip_count"
+        ]
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "pickup_borough",
+        "value_set": [
+          "Bronx",
+          "Brooklyn",
+          "EWR",
+          "Manhattan",
+          "Queens",
+          "Unknown"
+        ]
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "pickup_borough"
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "dropoff_borough",
+        "value_set": [
+          "Bronx",
+          "Brooklyn",
+          "EWR",
+          "Manhattan",
+          "Queens",
+          "Staten Island",
+          "Unknown"
+        ]
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "dropoff_borough"
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_min_to_be_between",
+      "kwargs": {
+        "column": "trip_count",
+        "max_value": 1,
+        "min_value": 1
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_max_to_be_between",
+      "kwargs": {
+        "column": "trip_count",
+        "max_value": 8495,
+        "min_value": 8495
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "trip_count"
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_mean_to_be_between",
+      "kwargs": {
+        "column": "trip_count",
+        "max_value": 400,
+        "min_value": 300
+      },
+      "meta": {}
+    }
+  ],
+  "meta": {
+    "columns": {
+      "dropoff_borough": {
+        "description": ""
+      },
+      "pickup_borough": {
+        "description": ""
+      },
+      "trip_count": {
+        "description": ""
+      }
+    },
+    "great_expectations_version": "0.13.15"
+  }
+}

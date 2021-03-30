@@ -1,0 +1,24 @@
+default:
+  outputs:
+
+    astro_dev:
+      type: postgres
+      threads: 1
+      host: postgres
+      port: 5432
+      user: postgres
+      pass: postgres
+      dbname: postgres
+      schema: public
+
+    local_dev:
+      type: postgres
+      threads: 1
+      host: localhost
+      port: 5432
+      user: postgres
+      pass: postgres
+      dbname: postgres
+      schema: public
+
+  target: astro_dev

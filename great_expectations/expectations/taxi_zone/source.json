@@ -1,0 +1,121 @@
+{
+  "data_asset_type": "Dataset",
+  "expectation_suite_name": "taxi_zone.source",
+  "expectations": [
+    {
+      "expectation_type": "expect_table_columns_to_match_ordered_list",
+      "kwargs": {
+        "column_list": [
+          "locationid",
+          "borough",
+          "zone",
+          "service_zone"
+        ]
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_table_row_count_to_be_between",
+      "kwargs": {
+        "max_value": 265,
+        "min_value": 265
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_min_to_be_between",
+      "kwargs": {
+        "column": "locationid",
+        "max_value": 1,
+        "min_value": 1
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_max_to_be_between",
+      "kwargs": {
+        "column": "locationid",
+        "max_value": 265,
+        "min_value": 265
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "locationid"
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "borough",
+        "value_set": [
+          "Bronx",
+          "Brooklyn",
+          "EWR",
+          "Manhattan",
+          "Queens",
+          "Staten Island",
+          "Unknown"
+        ]
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "borough"
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "zone",
+        "mostly": 0.99
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "service_zone",
+        "value_set": [
+          "Airports",
+          "Boro Zone",
+          "EWR",
+          "Yellow Zone",
+          "N/A"
+        ]
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "service_zone",
+        "mostly": 0.99
+      },
+      "meta": {}
+    }
+  ],
+  "meta": {
+    "columns": {
+      "borough": {
+        "description": ""
+      },
+      "locationid": {
+        "description": ""
+      },
+      "service_zone": {
+        "description": ""
+      },
+      "zone": {
+        "description": ""
+      }
+    },
+    "great_expectations_version": "0.13.15"
+  }
+}

@@ -17,3 +17,33 @@ Demo data pipeline with dbt, Airflow, Great Expectations.
 * You can run `astro dev stop` to stop the container again
 
 You can also run the DAG in this repo with a **standard Airflow installation** if you want. You'll have to install the relevant dependencies (Airflow, dbt, Great Expectations, the respective operators, etc) and probably handle some more configurations to get it to work.
+
+## Development
+
+In order to develop the dbt DAG and Great Expectations locally instead of in the containers (for faster dev loops), I created a new virtual environment with and installed relevant packages wit `pip install -r requirements.txt`
+
+**dbt setup**
+
+- Ran `dbt init dbt` to create the dbt directory in this repo
+- I copied `~/.dbt/profiles.yml` into the root of this project and added the Astronomer postgres creds to have a database available -- **you wouldn't use this database in production or keep the file in the repo, this is just a shortcut for this demo!!**
+- The `profiles.yml` target setup allows me to run the dbt pipeline both locally and within the container:
+  - Container:
+    - connect to shell within the scheduler container
+    - run `cd dbt`
+    - run `dbt run --profiles-dir /usr/local/airflow --target astro_dev`
+  - Local:
+    - run `cd dbt`
+    - run `dbt run --profiles-dir /Users/sam/code/dag-stack --target local_dev`
+
+**Great Expectations setup**
+
+- Ran `great_expectations init` to create the great_expectations directory in this repo
+- Created Datasources for the `data` directory and the Astronomer postgres database using the `great_expectations datasource new` command
+  - Note that I have two Datasources for the different host names, similar to the two dbt targets
+  - I copied the credentials from `uncommitted/config_variables.yml` into the `datasources` section in `great_expectations.yml` for the purpose of this demo, since the `uncommitted` directory is git-ignored
+- Created new Expectation Suites using `great_expectations suite scaffold` against the `data_dir` and `postgres_local` Datasources and manually tweaked the scaffold output a little using `suite edit`
+
+**Airflow DAG setup**
+
+- I'm using the custom dbt and Great Expectations Airflow operators, but this could also be done with Python and bash operators
+- Note that the source data and loaded data validation both use the same Expectation Suite, which is a neat feature of Great Expectations -- a test suite can be run against any data asset to assert the same properties

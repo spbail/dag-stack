@@ -1,5 +1,5 @@
+great-expectations>=0.13.15
+airflow-provider-great-expectations>=0.0.5
 agate==1.6.1
-airflow-dbt
-airflow-provider-great-expectations
-great-expectations
 dbt
+airflow-dbt
