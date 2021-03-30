@@ -1,0 +1,5 @@
+agate==1.6.1
+airflow-dbt
+airflow-provider-great-expectations
+great-expectations
+dbt
