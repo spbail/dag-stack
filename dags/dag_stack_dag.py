@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
+from airflow.operators.bash_operator import BashOperator
 from datetime import datetime
 from airflow_dbt.operators.dbt_operator import (
     DbtSeedOperator,
@@ -13,7 +14,7 @@ def load_to_production_db(ts, **kwargs):
     This is just a stub for an optional Python task that loads the output of the dbt pipeline
     to a production database or data warehouse for further consumption
     """
-    print('Loading analytical output to production database.')
+    print('Loading analytical_output output to production database.')
     print('Done.')
 
 
@@ -25,10 +26,13 @@ default_args = {
 
 # These could be set with environment variables if you want to run the DAG outside the Astro container
 PROJECT_HOME = '/usr/local/airflow'
-GE_ROOT_DIR = os.path.join(PROJECT_HOME, 'great_expectations')
 DBT_PROJECT_DIR = os.path.join(PROJECT_HOME, 'dbt')
 DBT_TARGET = 'astro_dev'
-
+DBT_TARGET_DIR = os.path.join(DBT_PROJECT_DIR, 'target')
+DBT_DOCS_DIR = os.path.join(PROJECT_HOME, 'include', 'dbt_docs')
+GE_ROOT_DIR = os.path.join(PROJECT_HOME, 'great_expectations')
+GE_TARGET_DIR = os.path.join(GE_ROOT_DIR, 'uncommitted', 'data_docs')
+GE_DOCS_DIR = os.path.join(PROJECT_HOME, 'include', 'great_expectations_docs')
 
 dag = DAG(
     dag_id='dag_stack_dag',
@@ -48,8 +52,13 @@ validate_source_data = GreatExpectationsOperator(
             },
             'expectation_suite_name': 'taxi_zone.source'
         },
-        # For the sake of brevity, I'm only validation one data asset here,
-        # but could easily add another item to this list to validate more data assets
+        {
+            'batch_kwargs': {
+                'path': os.path.join(PROJECT_HOME, 'data', 'yellow_tripdata_sample_2019-01.csv'),
+                'datasource': 'data_dir'
+            },
+            'expectation_suite_name': 'taxi_trips.source'
+        },
     ],
     data_context_root_dir=GE_ROOT_DIR,
     dag=dag
@@ -73,12 +82,19 @@ validate_load = GreatExpectationsOperator(
         {
             'batch_kwargs': {
                 'datasource': 'postgres_astro',
-                'table': 'taxi_zone_lookup'
+                'table': 'taxi_zone_lookup',
+                'data_asset_name': 'taxi_zone_lookup'
             },
             'expectation_suite_name': 'taxi_zone.source'
         },
-        # For the sake of brevity, I'm only validation one data asset here,
-        # but could easily add another item to this list to validate more data assets
+        {
+            'batch_kwargs': {
+                'datasource': 'postgres_astro',
+                'table': 'yellow_tripdata_sample_2019-01',
+                'data_asset_name': 'yellow_tripdata_sample_2019-01'
+            },
+            'expectation_suite_name': 'taxi_trips.source'
+        },
     ],
     data_context_root_dir=GE_ROOT_DIR,
     dag=dag
@@ -97,10 +113,11 @@ dbt_run = DbtRunOperator(
 # with dbt, but I'm using Great Expectations for the sake of this demo.
 validate_transform = GreatExpectationsOperator(
     task_id='validate_transform',
-    expectation_suite_name='analytical_output',
+    expectation_suite_name='analytical_output.final',
     batch_kwargs={
         'datasource': 'postgres_astro',
-        'table': 'pickup_dropoff_borough_counts'
+        'table': 'pickup_dropoff_borough_counts',
+        'data_asset_name': 'pickup_dropoff_borough_counts'
     },
     data_context_root_dir=GE_ROOT_DIR,
     dag=dag
@@ -112,4 +129,42 @@ load_to_prod = PythonOperator(
     dag=dag
 )
 
-validate_source_data >> dbt_seed >> validate_load >> dbt_run >> validate_transform >> load_to_prod
+dbt_docs_generate = BashOperator(
+    task_id='dbt_docs_generate',
+    bash_command=f'dbt docs generate \
+    --profiles-dir {PROJECT_HOME} \
+    --target {DBT_TARGET} \
+    --project-dir {DBT_PROJECT_DIR}',
+    dag=dag
+)
+
+# This task copies the dbt docs to the include directory that's mapped to my local volume
+# so I can `dbt docs serve` them locally. In production, I'd upload this to an S3 bucket!
+dbt_docs_copy = BashOperator(
+    task_id='dbt_docs_copy',
+    bash_command=f'mkdir {DBT_DOCS_DIR}; \
+    cp -r {DBT_TARGET_DIR} {DBT_DOCS_DIR}',
+    dag=dag
+)
+
+# This task re-builds the Great Expectations docs
+ge_docs_generate = BashOperator(
+    task_id='ge_docs_generate',
+    bash_command=f'great_expectations docs build --directory {GE_ROOT_DIR} --assume-yes',
+    dag=dag
+)
+
+# This task copies the Great Expectations docs to the include directory that's mapped to my local volume
+# so I can open them locally. In production, I'd upload this to an S3 bucket!
+ge_docs_copy = BashOperator(
+    task_id='ge_docs_copy',
+    bash_command=f'mkdir {GE_DOCS_DIR}; \
+    cp -r {GE_TARGET_DIR} {GE_DOCS_DIR}',
+    dag=dag
+)
+
+validate_source_data >> dbt_seed >> validate_load >> dbt_run >> validate_transform
+validate_transform >> [dbt_docs_generate, ge_docs_generate]
+dbt_docs_generate >> dbt_docs_copy
+ge_docs_generate >> ge_docs_copy
+[dbt_docs_copy, ge_docs_copy] >> load_to_prod
