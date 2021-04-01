@@ -100,6 +100,7 @@ validate_load = GreatExpectationsOperator(
     dag=dag
 )
 
+
 # This runs the transformation steps in the dbt pipeline
 dbt_run = DbtRunOperator(
     task_id='dbt_run',

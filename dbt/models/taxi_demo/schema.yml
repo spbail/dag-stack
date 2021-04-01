@@ -6,3 +6,22 @@ sources:
     tables:
       - name: taxi_zone_lookup
       - name: yellow_tripdata_sample_2019-01
+
+models:
+  - name: trips_with_borough_name
+    description: "This model adds the borough names for the pickup and dropoff locations for each trip."
+    columns:
+      - name: vendor_id
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 4]
+      - name: pickup_datetime
+        tests:
+          - not_null
+      - name: dropoff_datetime
+        tests:
+          - not_null
+      - name: passenger_count
+        tests:
+          - not_null
