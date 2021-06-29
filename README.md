@@ -2,6 +2,15 @@
 
 Demo data pipeline with dbt, Airflow, Great Expectations.
 
+---
+
+### ☕ Buy me a coffee ☕
+
+If you enjoy this workshop and want to say thanks, you can buy me a coffee here: https://www.buymeacoffee.com/sambail
+Thank you 😄
+
+---
+
 
 ## How to run
 
