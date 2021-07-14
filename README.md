@@ -2,6 +2,8 @@
 
 Demo data pipeline with dbt, Airflow, Great Expectations.
 
+See another possible architecture for this at https://github.com/astronomer/airflow-dbt-demo
+
 ---
 
 ### ☕ Buy me a coffee ☕
